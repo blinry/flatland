@@ -52,9 +52,9 @@ class Line
 end
 
 class Rect
-    def initialize size
-        @size=size
-        @pos=Vec2[0,0]
+    def initialize size,center=[0,0]
+        @size=size.to_v
+        @pos=center.to_v
         self
     end
     attr_accessor :size
@@ -68,16 +68,16 @@ class Rect
         @size.y
     end
     def top
-        @y-@size.y/2.0
+        @pos.y-@size.y/2.0
     end
     def bottom
-        @y+@size.y/2.0
+        @pos.y+@size.y/2.0
     end
     def right
-        @x+@size.x/2.0
+        @pos.x+@size.x/2.0
     end
     def left
-        @x-@size.x/2.0
+        @pos.x-@size.x/2.0
     end
     def topleft
         Vec2[left,top]
@@ -86,12 +86,18 @@ class Rect
         @pos=vec+@size/2
         self
     end
+    def topright
+        Vec2[right,top]
+    end
     def bottomright
         Vec2[right,bottom]
     end
     def bottomright= vec
         @pos=vec-@size/2
         self
+    end
+    def bottomleft
+        Vec2[left,bottom]
     end
     def collides? shape
         case shape.class

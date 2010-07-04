@@ -54,28 +54,32 @@ end
 
 class GameWindow < Gosu::Window
   def initialize
-    super(800, 400, false)
+    super(800, 600, false)
     self.caption = "Flatland"
     @camera = View.new
 
     @lines = []
 
+    range = 10
+
+    add_quad Rect.new([2*range,2*range],[0,0]), [0,0,0]
+
     5.times do
-        range = 10
         x = rand(range*2)-range
         y = rand(range*2)-range
 
-        a = Vec2.new(x-1,y-1)
-        b = Vec2.new(x-1,y+1)
-        c = Vec2.new(x+1,y+1)
-        d = Vec2.new(x+1,y-1)
-
-        col = [rand, rand, rand]
-        [[a,b],[b,c],[c,d],[d,a]].each do |from, to|
-            @lines << Wall.new(from, to, col)
-        end
+        add_quad Rect.new([1,1],[x,y]), [rand, rand, rand]
     end
 
+  end
+
+  def add_quad q, col
+      [[q.topleft,q.topright],
+          [q.topright,q.bottomright],
+          [q.bottomright,q.bottomleft],
+          [q.bottomleft,q.topleft]].each do |from, to|
+          @lines << Wall.new(from, to, col)
+          end
   end
 
   def update
@@ -96,24 +100,24 @@ class GameWindow < Gosu::Window
   end
 
   def gl_init
-          bgcolor = [1,1,1,1]
+      bgcolor = [1,1,1,1]
 
-          glClearColor(*bgcolor)
-          glClearDepth(0)
-          glShadeModel(GL_SMOOTH)
+      glClearColor(*bgcolor)
+      glClearDepth(0)
+      glShadeModel(GL_SMOOTH)
 
-          glEnable(GL_DEPTH_TEST)
-          glDepthFunc(GL_GREATER)
-          #glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+      glEnable(GL_DEPTH_TEST)
+      glDepthFunc(GL_GREATER)
+      #glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
 
-          glFogi(GL_FOG_MODE,GL_LINEAR)
-          glFogfv(GL_FOG_COLOR, bgcolor)
-          #glFogf(GL_FOG_DENSITY, 0.15)
-          #glHint(GL_FOG_HINT, GL_NICEST)
-          glFogf(GL_FOG_START, 0.1)
-          glFogf(GL_FOG_END, 10)
-          glEnable(GL_FOG)
+      glFogi(GL_FOG_MODE,GL_LINEAR)
+      glFogfv(GL_FOG_COLOR, bgcolor)
+      #glFogf(GL_FOG_DENSITY, 0.15)
+      #glHint(GL_FOG_HINT, GL_NICEST)
+      glFogf(GL_FOG_START, 0.1)
+      glFogf(GL_FOG_END, 10)
+      glEnable(GL_FOG)
   end
 
   def gl_view
@@ -135,10 +139,10 @@ class GameWindow < Gosu::Window
       @lines.each do |line|
           glColor3f(line.color[0], line.color[1], line.color[2])
           glBegin(GL_POLYGON);
-              glVertex3f(line.from.x, -d,line.from.y);
-              glVertex3f(line.from.x, d,line.from.y);
-              glVertex3f(line.to.x, d,line.to.y);
-              glVertex3f(line.to.x, -d,line.to.y);
+          glVertex3f(line.from.x, -d,line.from.y);
+          glVertex3f(line.from.x, d,line.from.y);
+          glVertex3f(line.to.x, d,line.to.y);
+          glVertex3f(line.to.x, -d,line.to.y);
           glEnd
 =begin
           glColor3f(0,0,0)

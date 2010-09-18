@@ -62,14 +62,16 @@ class GameWindow < Gosu::Window
 
     range = 10
 
-    add_quad Rect.new([2*range,2*range],[0,0]), [0,0,0]
+    #add_quad Rect.new([2*range,2*range],[0,0]), [0,0,0]
 
-    5.times do
+    100.times do
         x = rand(range*2)-range
         y = rand(range*2)-range
 
-        add_quad Rect.new([1,1],[x,y]), [rand, rand, rand]
+        add_quad Rect.new([rand,rand],[x,y]), [rand/2.0+0.5, rand/2.0+0.5, rand/2.0+0.5]
     end
+
+    gl_init
 
   end
 
@@ -100,7 +102,8 @@ class GameWindow < Gosu::Window
   end
 
   def gl_init
-      bgcolor = [1,1,1,1]
+      #bgcolor = [1,1,1,1]
+      bgcolor = [0,0,0,1]
 
       glClearColor(*bgcolor)
       glClearDepth(0)
@@ -108,8 +111,13 @@ class GameWindow < Gosu::Window
 
       glEnable(GL_DEPTH_TEST)
       glDepthFunc(GL_GREATER)
-      #glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
+      #glEnable(GL_LIGHTING)
+      #glEnable(GL_LIGHT0)
+      #glEnable(GL_COLOR_MATERIAL)
+
+      #glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.5,0.5,0.5,1])
+      #glLightfv(GL_LIGHT0, GL_POSITION, [0,0,0,1])
 
       glFogi(GL_FOG_MODE,GL_LINEAR)
       glFogfv(GL_FOG_COLOR, bgcolor)
@@ -135,7 +143,7 @@ class GameWindow < Gosu::Window
 
   def gl_render
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      d=1000
+      d=100
       @lines.each do |line|
           glColor3f(line.color[0], line.color[1], line.color[2])
           glBegin(GL_POLYGON);
@@ -162,38 +170,17 @@ class GameWindow < Gosu::Window
       # everything so Gosu's rendering can take place again.
 
       gl do
-          gl_init
           gl_reshape
           gl_view
           gl_render
-
-=begin
-
-          glLoadIdentity
-
-          w=0.05
-
-          glColor3f(0, 0, 0);
-
-          glBegin(GL_POLYGON);
-          glVertex3f(-1,1,0)
-          glVertex3f(-1,w,0)
-          glVertex3f(1,w,0)
-          glVertex3f(1,1,0)
-          glEnd();
-
-          glBegin(GL_POLYGON);
-          glVertex3f(-1,-1,0)
-          glVertex3f(-1,-w,0)
-          glVertex3f(1,-w,0)
-          glVertex3f(1,-1,0)
-          glEnd();
-=end
       end
+
       c=Gosu::Color::BLACK
       d=0.45
       draw_quad(0,0,c,width,0,c,width,height*d,c,0,height*d,c)
+      d=0.5
       draw_quad(0,height,c,width,height,c,width,height*(1-d),c,0,height*(1-d),c)
+
   end
 
   def button_down(id)

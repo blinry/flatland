@@ -67,8 +67,11 @@ class GameWindow < Gosu::Window
     100.times do
         x = rand(range*2)-range
         y = rand(range*2)-range
+        color = [rand/2.0+0.5, rand/2.0+0.5, rand/2.0+0.5]
+        size_multiplier = 1
 
-        add_quad Rect.new([rand,rand],[x,y]), [rand/2.0+0.5, rand/2.0+0.5, rand/2.0+0.5]
+
+        add_quad Rect.new([rand*size_multiplier,rand*size_multiplier],[x,y]), color
     end
 
     gl_init
@@ -85,6 +88,11 @@ class GameWindow < Gosu::Window
   end
 
   def update
+      move_camera
+      set_mouse_position(width/2.0,height/2.0)
+  end
+
+  def move_camera
       forward = 0
       right = 0
       speed = 0.03
@@ -98,7 +106,6 @@ class GameWindow < Gosu::Window
       @camera.move(forward,right)
 
       @camera.rotate(mouse_speed*(mouse_x-width/2.0))
-      set_mouse_position(width/2.0,height/2.0)
   end
 
   def gl_init
@@ -124,7 +131,7 @@ class GameWindow < Gosu::Window
       #glFogf(GL_FOG_DENSITY, 0.15)
       #glHint(GL_FOG_HINT, GL_NICEST)
       glFogf(GL_FOG_START, 0.1)
-      glFogf(GL_FOG_END, 10)
+      glFogf(GL_FOG_END, 5)
       glEnable(GL_FOG)
   end
 
@@ -137,7 +144,7 @@ class GameWindow < Gosu::Window
   def gl_reshape
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity
-      gluPerspective(50,4/3.0,100,0.1)
+      gluPerspective(50,4/3.0,100,0.001)
       glMatrixMode(GL_MODELVIEW);
   end
 
@@ -152,15 +159,6 @@ class GameWindow < Gosu::Window
           glVertex3f(line.to.x, d,line.to.y);
           glVertex3f(line.to.x, -d,line.to.y);
           glEnd
-=begin
-          glColor3f(0,0,0)
-          glBegin(GL_LINES)
-              glVertex3f(line.from.x, -d,line.from.y);
-              glVertex3f(line.from.x, d,line.from.y);
-              glVertex3f(line.to.x, d,line.to.y);
-              glVertex3f(line.to.x, -d,line.to.y);
-          glEnd
-=end
       end
       glFlush();
   end
@@ -175,11 +173,14 @@ class GameWindow < Gosu::Window
           gl_render
       end
 
-      c=Gosu::Color::BLACK
-      d=0.45
-      draw_quad(0,0,c,width,0,c,width,height*d,c,0,height*d,c)
-      d=0.5
-      draw_quad(0,height,c,width,height,c,width,height*(1-d),c,0,height*(1-d),c)
+      if true
+      #if false
+          c=Gosu::Color::BLACK
+          d=0.45
+          draw_quad(0,0,c,width,0,c,width,height*d,c,0,height*d,c)
+          d=0.5
+          draw_quad(0,height,c,width,height,c,width,height*(1-d),c,0,height*(1-d),c)
+      end
 
   end
 

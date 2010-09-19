@@ -9,7 +9,8 @@ include Gl
 include Glu
 
 class View
-    attr_reader :pos, :rot
+    attr_reader :rot
+    attr_accessor :pos
     def initialize
         @pos = Vec2.new(0, 0)
         @rot = 0
@@ -60,30 +61,33 @@ class GameWindow < Gosu::Window
 
     @lines = []
 
-    range = 10
+    range = 2
 
     #add_quad Rect.new([2*range,2*range],[0,0]), [0,0,0]
 
-    100.times do
-        x = rand(range*2)-range
-        y = rand(range*2)-range
-        color = [rand/2.0+0.5, rand/2.0+0.5, rand/2.0+0.5]
-        size_multiplier = 1
+        20.times do
+            x = rand(range*2)-range
+            y = rand(range*2)-range
+            red = [1,0,0]
+            green = [0,1,0]
+            white = [1,1,1]
+            color = [red, green, white][rand(3)]
+            size_multiplier = 1
 
 
-        add_quad Rect.new([rand*size_multiplier,rand*size_multiplier],[x,y]), color
-    end
+            add_quad Rect.new([rand*size_multiplier,rand*size_multiplier],[x,y]), color
+        end
 
-    gl_init
+        gl_init
 
-  end
+      end
 
-  def add_quad q, col
-      [[q.topleft,q.topright],
-          [q.topright,q.bottomright],
-          [q.bottomright,q.bottomleft],
-          [q.bottomleft,q.topleft]].each do |from, to|
-          @lines << Wall.new(from, to, col)
+      def add_quad q, col
+          [[q.topleft,q.topright],
+              [q.topright,q.bottomright],
+              [q.bottomright,q.bottomleft],
+              [q.bottomleft,q.topleft]].each do |from, to|
+              @lines << Wall.new(from, to, col)
           end
   end
 
@@ -98,14 +102,39 @@ class GameWindow < Gosu::Window
       speed = 0.03
       mouse_speed = 0.1
 
+      prev_pos = @camera.pos.clone
+
       forward += speed if button_down? Gosu::KbUp or button_down? Gosu::KbW
       forward -= speed if button_down? Gosu::KbDown or button_down? Gosu::KbS
       right += speed if button_down? Gosu::KbRight or button_down? Gosu::KbD
       right -= speed if button_down? Gosu::KbLeft or button_down? Gosu::KbA
 
       @camera.move(forward,right)
-
       @camera.rotate(mouse_speed*(mouse_x-width/2.0))
+
+      after_pos = @camera.pos.clone
+
+      camera_movement = Line.new(-prev_pos, -after_pos)
+
+      if camera_movement.length > 0
+          @lines.each do |line|
+              if line.collides? camera_movement
+                  case line.color
+                  when [1,0,0]
+                      raise "GAME OVER"
+                  when [0,1,0]
+                      @lines.delete(line)
+                  else
+                      @camera.pos = prev_pos
+                      break
+                  end
+              end
+          end
+      end
+
+      if @lines.count{|l| l.color == [0,1,0]} == 0
+          raise "YOU WIN"
+      end
   end
 
   def gl_init
@@ -160,7 +189,7 @@ class GameWindow < Gosu::Window
           glVertex3f(line.to.x, -d,line.to.y);
           glEnd
       end
-      glFlush();
+      glFlush
   end
 
   def draw

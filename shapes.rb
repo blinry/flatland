@@ -32,6 +32,9 @@ class Vec2
     def / n
         Vec2[@x/n.to_f,@y/n.to_f]
     end
+    def -@
+        Vec2[-@x,-@y]
+    end
     def angle_to other
         Math::atan2(other.x-@x, other.y-@y)/Math::PI*180
     end
@@ -48,6 +51,36 @@ class Line
     def initialize from, to
         @from = from
         @to = to
+    end
+    def length
+        if @from == @to
+            0
+        else
+            Math::sqrt((@from.x-@to.x)**2+(@from.y-@to.y)**2)
+        end
+    end
+    def collides? shape
+        a = Line.check_clockwise(@from, @to, shape.from)
+        b = Line.check_clockwise(@from, @to, shape.to)
+        if a != b
+            a = Line.check_clockwise(shape.from, shape.to, @from)
+            b = Line.check_clockwise(shape.from, shape.to, @to)
+            if a != b
+                return true
+            end
+        end
+        return false
+    end
+    private
+    def Line.check_clockwise p1, p2, p3
+        foo = ((p2.x-p1.x)*(p3.y-p1.y)) - ((p3.x-p1.x)*(p2.y-p1.y))
+        if foo < 0
+            true
+        elsif foo > 0
+            false
+        else
+            nil
+        end
     end
 end
 

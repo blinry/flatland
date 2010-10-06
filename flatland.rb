@@ -168,6 +168,8 @@ class GameWindow < Gosu::Window
           glEnable(GL_DEPTH_TEST)
           glDepthFunc(GL_GREATER)
 
+          glLineWidth(5)
+
           #glEnable(GL_LIGHTING)
           #glEnable(GL_LIGHT0)
           #glEnable(GL_COLOR_MATERIAL)
@@ -202,11 +204,11 @@ class GameWindow < Gosu::Window
           d=100
           @lines.each do |line|
               glColor3f(line.color[0], line.color[1], line.color[2])
-              glBegin(GL_POLYGON);
-              glVertex3f(line.from.x, -d,line.from.y);
-              glVertex3f(line.from.x, d,line.from.y);
-              glVertex3f(line.to.x, d,line.to.y);
-              glVertex3f(line.to.x, -d,line.to.y);
+              glBegin(GL_LINES);
+              #glVertex3f(line.from.x, -d,line.from.y);
+              glVertex3f(line.from.x, 0,line.from.y);
+              #glVertex3f(line.to.x, d,line.to.y);
+              glVertex3f(line.to.x, 0,line.to.y);
               glEnd
           end
           glFlush
@@ -221,16 +223,6 @@ class GameWindow < Gosu::Window
               gl_view
               gl_render
           end
-
-          if true
-              #if false
-              c=Gosu::Color::BLACK
-              d=0.49
-              draw_quad(0,0,c,width,0,c,width,height*d,c,0,height*d,c)
-              d=0.5
-              draw_quad(0,height,c,width,height,c,width,height*(1-d),c,0,height*(1-d),c)
-          end
-
       end
 
       def button_down(id)

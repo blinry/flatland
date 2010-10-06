@@ -64,6 +64,7 @@ class GameWindow < Gosu::Window
     super(800, 600, false)
     self.caption = "Flatland"
     @camera = View.new
+    @top_view = false
 
     @lines = []
 
@@ -71,9 +72,9 @@ class GameWindow < Gosu::Window
 
     #add_quad Rect.new([2*range,2*range],[0,0]), [0,0,0]
 
-        10.times do
-            x = rand(range*2)-range
-            y = rand(range*2)-range
+        20.times do
+            x = rand*range*2-range
+            y = rand*range*2-range
             red = [1,0,0]
             green = [0,1,0]
             white = [1,1,1]
@@ -188,8 +189,14 @@ class GameWindow < Gosu::Window
 
       def gl_view
           glLoadIdentity
-          glRotatef(@camera.rot,0,1,0)
-          glTranslatef(@camera.pos.x,0,@camera.pos.y)
+          if @top_view
+              glRotatef(90,1,0,0)
+              glRotatef(@camera.rot,0,1,0)
+              glTranslatef(@camera.pos.x,-4,@camera.pos.y)
+          else
+              glRotatef(@camera.rot,0,1,0)
+              glTranslatef(@camera.pos.x,0,@camera.pos.y)
+          end
       end
 
       def gl_reshape
@@ -211,6 +218,11 @@ class GameWindow < Gosu::Window
               glVertex3f(line.to.x, 0,line.to.y);
               glEnd
           end
+              glColor3f(255,255,255)
+              glBegin(GL_LINES);
+              glVertex3f(-@camera.pos.x-0.01, 0, -@camera.pos.y-0.01)
+              glVertex3f(-@camera.pos.x+0.01, 0, -@camera.pos.y+0.01)
+              glEnd
           glFlush
       end
 
@@ -226,8 +238,11 @@ class GameWindow < Gosu::Window
       end
 
       def button_down(id)
-          if id == Gosu::KbEscape
+          case id
+          when Gosu::KbEscape
               close
+          when Gosu::KbT
+              @top_view = ! @top_view
           end
       end
 end

@@ -10,10 +10,12 @@ include Glu
 
 class View
     attr_reader :rot
-    attr_accessor :pos
+    attr_accessor :pos, :down_rot, :height
     def initialize
         @pos = Vec2.new(0, 0)
         @rot = 0
+        @down_rot = 0
+        @height = 0
     end
     def right!
         rotate 3
@@ -110,6 +112,25 @@ class GameWindow < Gosu::Window
       end
 
       def move_camera
+          f = 20.0
+          r = 90/f
+          h = 4/f
+          if @top_view
+              if @camera.height < 4
+                  @camera.height += h
+              end
+              if @camera.down_rot < 90
+                  @camera.down_rot += r
+              end
+          else
+              if @camera.height > 0
+                  @camera.height -= h
+              end
+              if @camera.down_rot > 0
+                  @camera.down_rot -= r
+              end
+          end
+
           forward = 0
           right = 0
           speed = 0.03
@@ -189,14 +210,9 @@ class GameWindow < Gosu::Window
 
       def gl_view
           glLoadIdentity
-          if @top_view
-              glRotatef(90,1,0,0)
-              glRotatef(@camera.rot,0,1,0)
-              glTranslatef(@camera.pos.x,-4,@camera.pos.y)
-          else
-              glRotatef(@camera.rot,0,1,0)
-              glTranslatef(@camera.pos.x,0,@camera.pos.y)
-          end
+          glRotatef(@camera.down_rot,1,0,0)
+          glRotatef(@camera.rot,0,1,0)
+          glTranslatef(@camera.pos.x,-@camera.height,@camera.pos.y)
       end
 
       def gl_reshape

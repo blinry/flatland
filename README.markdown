@@ -10,8 +10,8 @@ You will need
 
 And the following Gems:
 
-- gosu: http://code.google.com/p/gosu/wiki/GettingStartedOnLinux
-- ruby-opengl: http://ruby-opengl.rubyforge.org/build_install.html
+- gosu: <http://code.google.com/p/gosu/wiki/GettingStartedOnLinux>
+- ruby-opengl: <http://ruby-opengl.rubyforge.org/build_install.html>
 
 Controls
 ========

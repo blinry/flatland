@@ -1,15 +1,15 @@
 class Vec2
+    attr_accessor :x,:y
     def initialize x,y
         @x=x.to_f
         @y=y.to_f
         self
     end
-    attr_accessor :x,:y
-    def == vec
-        @x==vec.x and @y==vec.y
-    end
     def Vec2.[] x,y
         Vec2.new(x,y)
+    end
+    def == vec
+        @x==vec.x and @y==vec.y
     end
     def to_a
         [@x,@y]
@@ -60,6 +60,8 @@ class Line
         end
     end
     def collides? shape
+        raise NotImplementedError unless shape.is_a? Line
+
         a = Line.check_clockwise(@from, @to, shape.from)
         b = Line.check_clockwise(@from, @to, shape.to)
         if a != b
@@ -71,7 +73,9 @@ class Line
         end
         return false
     end
+
     private
+
     def Line.check_clockwise p1, p2, p3
         foo = ((p2.x-p1.x)*(p3.y-p1.y)) - ((p3.x-p1.x)*(p2.y-p1.y))
         if foo < 0
@@ -138,32 +142,20 @@ class Rect
             return (shape.x > left and shape.x < right and shape.y > top and shape.y < bottom)
         when Rect
             return (right>shape.left and left<shape.right and bottom>shape.top and top<shape.bottom)
-        when Circle
-            #TODO
+        else
+            raise NotImplementedError
         end
     end
 end
 
 class Circle
+    attr_accessor :pos,:radius
     def initialize pos, radius
         @pos=pos
         @radius=radius
         self
     end
-    attr_accessor :pos,:radius
     def center
         @pos
-    end
-    def diameter
-        @radius*2
-    end
-    #TODO: doesn't work
-    def collides? shape
-        case shape.class
-        when Vec2
-            return (Math.sqrt((shape.x-@pos.x)**2+(shape.y-@pos.y)**2)<@radius)
-        else
-            raise ArgumentError, "can't collide with a #{shape.class}"
-        end
     end
 end

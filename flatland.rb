@@ -63,32 +63,33 @@ end
 
 class GameWindow < Gosu::Window
     def initialize
-        super(800, 600, false)
+        super 800, 600, false
         self.caption = "Flatland"
+
         @camera = View.new
         @top_view = false
-
         @lines = []
 
-        range = 2
+        create_random_level
+        gl_init
+    end
 
-        #add_quad Rect.new([2*range,2*range],[0,0]), [0,0,0]
+    def create_random_level
+        level_size = 2
+
+        #add_quad Rect.new([2*level_size,2*level_size],[0,0]), [0,0,0]
 
         20.times do
-            x = rand*range*2-range
-            y = rand*range*2-range
+            x = rand*level_size*2-level_size
+            y = rand*level_size*2-level_size
+
             red = [1,0,0]
             green = [0,1,0]
             white = [1,1,1]
             color = [red, green, white][rand(3)]
-            size_multiplier = 1
 
-
-            add_quad Rect.new([rand*size_multiplier,rand*size_multiplier],[x,y]), color
+            add_quad Rect.new([rand,rand],[x,y]), color
         end
-
-        gl_init
-
     end
 
     def add_quad q, col
@@ -99,6 +100,7 @@ class GameWindow < Gosu::Window
             [q.bottomleft,q.topleft]].each do |from, to|
             rect << Wall.new(from, to, col)
             end
+
         rect[0].connect rect[1]
         rect[1].connect rect[2]
         rect[2].connect rect[3]
@@ -115,6 +117,7 @@ class GameWindow < Gosu::Window
         f = 20.0
         r = 90/f
         h = 4/f
+
         if @top_view
             if @camera.height < 4
                 @camera.height += h
@@ -148,8 +151,13 @@ class GameWindow < Gosu::Window
 
         after_pos = @camera.pos.clone
 
-        camera_movement = Line.new(-prev_pos, -after_pos)
+        collision = check_for_collision(Line.new(-prev_pos, -after_pos))
+        if collision
+            @camera.pos = prev_pos
+        end
+    end
 
+    def check_for_collision camera_movement
         if camera_movement.length > 0
             @lines.each do |line|
                 if line.collides? camera_movement
@@ -158,9 +166,8 @@ class GameWindow < Gosu::Window
                         raise "GAME OVER"
                     when [0,1,0]
                         delete_wall line
-                    else
-                        @camera.pos = prev_pos
-                        break
+                    else # white!
+                        return true
                     end
                 end
             end
@@ -169,6 +176,8 @@ class GameWindow < Gosu::Window
         if @lines.count{|l| l.color == [0,1,0]} == 0
             raise "YOU WIN"
         end
+
+        return false
     end
 
     def delete_wall wall
@@ -180,11 +189,10 @@ class GameWindow < Gosu::Window
     end
 
     def gl_init
-        #bgcolor = [1,1,1,1]
         bgcolor = [0,0,0,1]
-
         glClearColor(*bgcolor)
         glClearDepth(0)
+
         glShadeModel(GL_SMOOTH)
 
         glEnable(GL_DEPTH_TEST)
@@ -192,17 +200,8 @@ class GameWindow < Gosu::Window
 
         glLineWidth(5)
 
-        #glEnable(GL_LIGHTING)
-        #glEnable(GL_LIGHT0)
-        #glEnable(GL_COLOR_MATERIAL)
-
-        #glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.5,0.5,0.5,1])
-        #glLightfv(GL_LIGHT0, GL_POSITION, [0,0,0,1])
-
         glFogi(GL_FOG_MODE,GL_LINEAR)
         glFogfv(GL_FOG_COLOR, bgcolor)
-        #glFogf(GL_FOG_DENSITY, 0.15)
-        #glHint(GL_FOG_HINT, GL_NICEST)
         glFogf(GL_FOG_START, 0.1)
         glFogf(GL_FOG_END, 5)
         glEnable(GL_FOG)
@@ -228,12 +227,11 @@ class GameWindow < Gosu::Window
         @lines.each do |line|
             glColor3f(line.color[0], line.color[1], line.color[2])
             glBegin(GL_LINES);
-            #glVertex3f(line.from.x, -d,line.from.y);
             glVertex3f(line.from.x, 0,line.from.y);
-            #glVertex3f(line.to.x, d,line.to.y);
             glVertex3f(line.to.x, 0,line.to.y);
             glEnd
         end
+
         glColor3f(255,255,255)
         glBegin(GL_LINES);
         glVertex3f(-@camera.pos.x-0.01, 0, -@camera.pos.y-0.01)
@@ -243,8 +241,8 @@ class GameWindow < Gosu::Window
     end
 
     def draw
-        # gl will execute the given block in a clean OpenGL environment, then reset
-        # everything so Gosu's rendering can take place again.
+        # "gl will execute the given block in a clean OpenGL environment, then reset
+        # everything so Gosu's rendering can take place again"
 
         gl do
             gl_reshape
@@ -253,7 +251,7 @@ class GameWindow < Gosu::Window
         end
     end
 
-    def button_down(id)
+    def button_down id
         case id
         when Gosu::KbEscape
             close
